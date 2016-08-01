@@ -33,6 +33,8 @@ public class WikiSearch {
 	/**
 	 * Looks up the relevance of a given URL.
 	 * 
+	 * just returns the relavance score of a url
+	 * 
 	 * @param url
 	 * @return
 	 */
@@ -56,12 +58,27 @@ public class WikiSearch {
 	/**
 	 * Computes the union of two search results.
 	 * 
+	 * returns a WikiSearch map
+	 * 
+	 * get all urls that have search term that and what is being test, add to HashMap and return
+	 * 
 	 * @param that
 	 * @return New WikiSearch object.
 	 */
 	public WikiSearch or(WikiSearch that) {
-        // FILL THIS IN!
-		return null;
+        // returns a WikiSearch object (map) with the union of urls of 2 search terms to their relavance
+		Map<String, Integer> union = new HashMap<String, Integer>(map);
+		// compute score of new urls
+		int score;
+		// go through each url and get relavance score with the map url
+		for (String url: that.map.keySet()) {
+			int score1 = this.getRelevance(url);
+			int score2 = that.getRelevance(url);
+			score = totalRelevance(score1, score2);
+			// add score and url to hashmap
+			union.put(url, score);
+		}
+		return new WikiSearch(union);
 	}
 	
 	/**
@@ -72,18 +89,31 @@ public class WikiSearch {
 	 */
 	public WikiSearch and(WikiSearch that) {
         // FILL THIS IN!
-		return null;
+		Map<String, Integer> intersection = new HashMap<String, Integer>();
+		int score, score1, score2;
+		for (String url: that.map.keySet()) {
+			if (this.map.containsKey(url)) {
+				score1 = this.map.get(url);
+				score2 = that.map.get(url);
+				score = totalRelevance(score1, score2);
+				intersection.put(url, score);
+			}
+		}
+		return new WikiSearch(intersection);
 	}
 	
 	/**
-	 * Computes the intersection of two search results.
+	 * Computes the difference of two search results.
 	 * 
 	 * @param that
 	 * @return New WikiSearch object.
 	 */
 	public WikiSearch minus(WikiSearch that) {
-        // FILL THIS IN!
-		return null;
+		Map<String, Integer> difference = new HashMap<String, Integer>(map);
+		for (String url: that.map.keySet()) {
+			difference.remove(url);
+		}
+		return new WikiSearch(difference);
 	}
 	
 	/**
@@ -101,11 +131,24 @@ public class WikiSearch {
 	/**
 	 * Sort the results by relevance.
 	 * 
+	 * results are returned in increasing order of relevance
+	 * 
 	 * @return List of entries with URL and relevance.
 	 */
 	public List<Entry<String, Integer>> sort() {
-        // FILL THIS IN!
-		return null;
+		// makes linked list and initializes the entries to have the entries found in map
+		List<Entry<String, Integer>> sorted = new LinkedList<Entry<String, Integer>>(this.map.entrySet());
+				
+		Comparator<Entry<String, Integer>> comparator = new Comparator<Entry<String, Integer>>() {
+			@Override
+			public int compare(Entry<String, Integer> x, Entry<String, Integer> y) {
+				// returns int based on whether x's value is greater than, less than, equal to y's value
+				return x.getValue().compareTo(y.getValue());
+			}
+		};
+		// sorts specified list according to order induced by the comparator
+		Collections.sort(sorted, comparator);
+		return sorted;
 	}
 
 	/**
